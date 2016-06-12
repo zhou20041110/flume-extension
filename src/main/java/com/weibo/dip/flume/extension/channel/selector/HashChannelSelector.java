@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.weibo.dip.flume.extension;
+package com.weibo.dip.flume.extension.channel.selector;
 
 import java.util.ArrayList;
 import java.util.List;
