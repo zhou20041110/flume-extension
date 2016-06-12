@@ -27,33 +27,26 @@ public class MultipleFileChannel extends BasicChannelSemantics {
 
 	private int channels;
 
-	private List<StrenthFileChannel> fileChannels = new ArrayList<>();
-
-	public List<StrenthFileChannel> getFileChannels() {
-		return fileChannels;
-	}
+	private List<EnhancedFileChannel> fileChannels = new ArrayList<>();
 
 	@Override
 	public void configure(Context context) {
 		channels = context.getInteger("channels");
-
-		String checkpointDirStr = context.getString("checkpointDir");
-
-		String dataDirStr = context.getString("dataDir");
-
 		LOGGER.info("channels: {}", channels);
 
-		LOGGER.info("checkpointDir: {}", checkpointDirStr);
-
-		LOGGER.info("dataDir: {}", dataDirStr);
-
 		Preconditions.checkState(channels > 0, "channels value must be more than zero");
+
+		String checkpointDirStr = context.getString("checkpointDir");
+		LOGGER.info("checkpointDir: {}", checkpointDirStr);
 
 		File checkpointDir = new File(checkpointDirStr);
 
 		if (!checkpointDir.exists()) {
 			checkpointDir.mkdirs();
 		}
+
+		String dataDirStr = context.getString("dataDir");
+		LOGGER.info("dataDir: {}", dataDirStr);
 
 		File dataDir = new File(dataDirStr);
 
@@ -62,9 +55,9 @@ public class MultipleFileChannel extends BasicChannelSemantics {
 		}
 
 		for (int index = 0; index < channels; index++) {
-			StrenthFileChannel fileChannel = new StrenthFileChannel();
+			EnhancedFileChannel fileChannel = new EnhancedFileChannel();
 
-			fileChannel.setName("fileChannel_" + index);
+			fileChannel.setName("EnhancedFileChannel_" + index);
 
 			Context ctx = new Context();
 
@@ -76,6 +69,8 @@ public class MultipleFileChannel extends BasicChannelSemantics {
 
 			fileChannels.add(fileChannel);
 		}
+
+		LOGGER.info("MultipleFileChannel configure success");
 	}
 
 	@Override
