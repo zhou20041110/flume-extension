@@ -10,7 +10,7 @@ import org.apache.flume.channel.file.FileChannel;
  * @author yurun
  *
  */
-public class EnhancedFileChannel extends FileChannel {
+public class PublicTransactionFileChannel extends FileChannel {
 
 	@Override
 	public BasicTransactionSemantics createTransaction() {

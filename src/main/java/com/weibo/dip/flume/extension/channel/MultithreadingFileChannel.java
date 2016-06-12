@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.flume.Context;
 import org.apache.flume.channel.BasicChannelSemantics;
 import org.apache.flume.channel.BasicTransactionSemantics;
@@ -21,23 +22,26 @@ import com.google.common.base.Preconditions;
  * @author yurun
  *
  */
-public class MultipleFileChannel extends BasicChannelSemantics {
+public class MultithreadingFileChannel extends BasicChannelSemantics {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MultipleFileChannel.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MultithreadingFileChannel.class);
 
 	private int channels;
 
-	private List<EnhancedFileChannel> fileChannels = new ArrayList<>();
+	private List<PublicTransactionFileChannel> fileChannels = new ArrayList<>();
 
 	@Override
 	public void configure(Context context) {
 		channels = context.getInteger("channels");
 		LOGGER.info("channels: {}", channels);
 
-		Preconditions.checkState(channels > 0, "channels value must be more than zero");
+		Preconditions.checkState(channels > 0, "channels's value must be greater than zero");
 
 		String checkpointDirStr = context.getString("checkpointDir");
 		LOGGER.info("checkpointDir: {}", checkpointDirStr);
+
+		Preconditions.checkState(StringUtils.isNotEmpty(checkpointDirStr),
+				"checkpointDirStr's value must not be empty");
 
 		File checkpointDir = new File(checkpointDirStr);
 
@@ -48,6 +52,8 @@ public class MultipleFileChannel extends BasicChannelSemantics {
 		String dataDirStr = context.getString("dataDir");
 		LOGGER.info("dataDir: {}", dataDirStr);
 
+		Preconditions.checkState(StringUtils.isNotEmpty(dataDirStr), "dataDirStr's value must not be empty");
+
 		File dataDir = new File(dataDirStr);
 
 		if (!dataDir.exists()) {
@@ -55,7 +61,7 @@ public class MultipleFileChannel extends BasicChannelSemantics {
 		}
 
 		for (int index = 0; index < channels; index++) {
-			EnhancedFileChannel fileChannel = new EnhancedFileChannel();
+			PublicTransactionFileChannel fileChannel = new PublicTransactionFileChannel();
 
 			fileChannel.setName("EnhancedFileChannel_" + index);
 

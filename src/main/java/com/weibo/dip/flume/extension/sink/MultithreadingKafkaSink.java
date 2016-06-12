@@ -5,12 +5,15 @@ package com.weibo.dip.flume.extension.sink;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
@@ -26,6 +29,8 @@ import org.apache.flume.sink.kafka.KafkaSinkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
@@ -34,13 +39,19 @@ import kafka.producer.ProducerConfig;
  * @author yurun
  *
  */
-public class StrenthKafkaSink extends AbstractSink implements Configurable {
+public class MultithreadingKafkaSink extends AbstractSink implements Configurable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSink.class);
 
 	private Properties kafkaProps;
 
+	private long processSleep;
+
+	private String topicHeaderName;
+
 	private int consumers;
+
+	private long batchSleep;
 
 	private ThreadPoolExecutor executor;
 
@@ -53,7 +64,7 @@ public class StrenthKafkaSink extends AbstractSink implements Configurable {
 	@Override
 	public Status process() throws EventDeliveryException {
 		try {
-			Thread.sleep(3 * 1000);
+			Thread.sleep(processSleep);
 		} catch (InterruptedException e) {
 		}
 
@@ -79,6 +90,8 @@ public class StrenthKafkaSink extends AbstractSink implements Configurable {
 
 				Event event = null;
 
+				Map<String, String> headers = null;
+
 				String eventTopic = null;
 
 				String eventKey = null;
@@ -91,15 +104,22 @@ public class StrenthKafkaSink extends AbstractSink implements Configurable {
 
 						messageList.clear();
 
-						for (int processedEvents = 0; processedEvents < batchSize; processedEvents += 1) {
+						for (int processedEvents = 0; processedEvents < batchSize; processedEvents++) {
 							event = channel.take();
 
 							if (event == null) {
-								// no events available in channel
 								break;
 							}
 
-							eventTopic = "flume_test_topic";
+							headers = event.getHeaders();
+
+							if (MapUtils.isNotEmpty(headers) && headers.containsKey(topicHeaderName)) {
+								eventTopic = headers.get(topicHeaderName);
+							} else {
+								LOGGER.warn("Event header names do not contain {}", topicHeaderName);
+
+								continue;
+							}
 
 							eventKey = String.valueOf(System.currentTimeMillis());
 
@@ -116,7 +136,7 @@ public class StrenthKafkaSink extends AbstractSink implements Configurable {
 
 						transaction.close();
 
-						// publish batch and commit.
+						// send batch
 						if (CollectionUtils.isNotEmpty(messageList)) {
 							long startTime = System.nanoTime();
 
@@ -128,12 +148,12 @@ public class StrenthKafkaSink extends AbstractSink implements Configurable {
 							counter.addToEventDrainSuccessCount(Long.valueOf(messageList.size()));
 						} else {
 							try {
-								Thread.sleep(100);
+								Thread.sleep(batchSleep);
 							} catch (InterruptedException e) {
 							}
 						}
 					} catch (Exception e) {
-						LOGGER.error("Failed to publish events: {}", ExceptionUtils.getFullStackTrace(e));
+						LOGGER.error("Failed to send events: {}", ExceptionUtils.getFullStackTrace(e));
 
 						if (transaction != null) {
 							try {
@@ -149,7 +169,7 @@ public class StrenthKafkaSink extends AbstractSink implements Configurable {
 					}
 				}
 			} catch (Exception e) {
-				LOGGER.error("channel consumer error: " + ExceptionUtils.getFullStackTrace(e));
+				LOGGER.error("Channel consumer error: " + ExceptionUtils.getFullStackTrace(e));
 			} finally {
 				if (producer != null) {
 					producer.close();
@@ -163,14 +183,14 @@ public class StrenthKafkaSink extends AbstractSink implements Configurable {
 	public synchronized void start() {
 		counter.start();
 
-		super.start();
-
 		executor = new ThreadPoolExecutor(consumers, consumers, 0L, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>());
 
 		for (int index = 0; index < consumers; index++) {
 			executor.submit(new ChannelConsumer());
 		}
+
+		super.start();
 	}
 
 	@Override
@@ -207,11 +227,30 @@ public class StrenthKafkaSink extends AbstractSink implements Configurable {
 	 */
 	@Override
 	public void configure(Context context) {
+		processSleep = context.getLong("processSleep", 3000L);
+		LOGGER.info("processSleep: {}", processSleep);
+
+		Preconditions.checkState(processSleep > 0, "processSleep's value must be greater than zero");
+
+		topicHeaderName = context.getString("topicHeaderName");
+		LOGGER.info("topicHeaderName: {}", topicHeaderName);
+
+		Preconditions.checkState(StringUtils.isNotEmpty(topicHeaderName), "topicHeaderName's value must not be empty");
+
 		consumers = context.getInteger("consumers");
 		LOGGER.info("consumers: {}", consumers);
 
+		Preconditions.checkState(consumers > 0, "consumers's value must be greater than zero");
+
 		batchSize = context.getInteger(KafkaSinkConstants.BATCH_SIZE, KafkaSinkConstants.DEFAULT_BATCH_SIZE);
-		LOGGER.info("batchSize: " + batchSize);
+		LOGGER.info("batchSize: {}" + batchSize);
+
+		Preconditions.checkState(batchSize > 0, "batchSize's value must be greater than zero");
+
+		batchSleep = context.getLong("batchSleep", 100L);
+		LOGGER.info("batchSleep: {}", batchSleep);
+
+		Preconditions.checkState(batchSleep > 0, "batchSleep's value must be greater than zero");
 
 		kafkaProps = KafkaSinkUtil.getKafkaProperties(context);
 		if (LOGGER.isDebugEnabled()) {
