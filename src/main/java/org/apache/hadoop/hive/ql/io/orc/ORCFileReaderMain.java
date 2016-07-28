@@ -39,7 +39,7 @@ public class ORCFileReaderMain {
 
 		NullWritable key = NullWritable.get();
 
-		OrcStruct value = null;
+		OrcStruct value = new OrcStruct(0);
 
 		while (reader.next(key, value)) {
 			System.out.println(value);
