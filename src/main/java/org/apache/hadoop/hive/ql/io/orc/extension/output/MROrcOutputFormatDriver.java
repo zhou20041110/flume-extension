@@ -8,6 +8,7 @@ import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.io.orc.MROrcOutputFormat;
 import org.apache.hadoop.hive.ql.io.orc.MROrcWritable;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.io.LongWritable;
@@ -22,6 +23,7 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -88,6 +90,9 @@ public class MROrcOutputFormatDriver extends Configured implements Tool {
 
 		FileInputFormat.addInputPath(jobConf, new Path(args[0]));
 		FileOutputFormat.setOutputPath(jobConf, new Path(args[1]));
+
+		jobConf.setInputFormat(TextInputFormat.class);
+		jobConf.setOutputFormat(MROrcOutputFormat.class);
 
 		jobConf.setMapperClass(MROrcOutputFormatMapper.class);
 
