@@ -26,6 +26,7 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TextInputFormat;
+import org.apache.hadoop.mapred.jobcontrol.Job;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -113,7 +114,7 @@ public class WWWMROrcOutputFormatDriver extends Configured implements Tool {
 
 		jobConf.setOutputKeyClass(NullWritable.class);
 		jobConf.setOutputValueClass(MROrcWritable.class);
-
+		
 		RunningJob runningJob = JobClient.runJob(jobConf);
 
 		runningJob.waitForCompletion();
