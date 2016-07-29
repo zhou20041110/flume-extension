@@ -44,7 +44,7 @@ public class MROrcInputFormatDriver extends Configured implements Tool {
 				Reporter reporter) throws IOException {
 			List<Writable> writables = value.gets();
 
-			String line = null;
+			String line = "";
 
 			int columns = writables != null ? writables.size() : 0;
 
