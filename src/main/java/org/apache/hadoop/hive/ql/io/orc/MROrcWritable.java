@@ -27,6 +27,10 @@ public class MROrcWritable implements Writable {
 		writables.add(writable);
 	}
 
+	public List<Writable> gets() {
+		return writables;
+	}
+
 	public Writable get() {
 		int columns = writables != null ? writables.size() : 0;
 
