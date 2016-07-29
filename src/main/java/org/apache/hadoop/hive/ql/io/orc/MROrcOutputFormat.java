@@ -66,7 +66,7 @@ public class MROrcOutputFormat extends FileOutputFormat<NullWritable, MROrcWrita
 	@Override
 	public RecordWriter<NullWritable, MROrcWritable> getRecordWriter(FileSystem fileSystem, JobConf jobConf,
 			String name, Progressable progress) throws IOException {
-		return null;
+		return new MROrcRecordWriter(fileSystem, jobConf, name, progress);
 	}
 
 }
