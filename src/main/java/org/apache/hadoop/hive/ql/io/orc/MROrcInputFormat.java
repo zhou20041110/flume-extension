@@ -35,13 +35,15 @@ public class MROrcInputFormat implements InputFormat<NullWritable, MROrcWritable
 
 			private NullWritable nullWritable = NullWritable.get();
 
+			private OrcStruct orcStruct = new OrcStruct(0);
+
 			@Override
 			public boolean next(NullWritable key, MROrcWritable value) throws IOException {
-				OrcStruct orcStruct = new OrcStruct(0);
-
 				boolean next = reader.next(nullWritable, orcStruct);
 
 				int columns = orcStruct.getNumFields();
+
+				value.clear();
 
 				for (int index = 0; index < columns; index++) {
 					value.add((Writable) orcStruct.getFieldValue(index));

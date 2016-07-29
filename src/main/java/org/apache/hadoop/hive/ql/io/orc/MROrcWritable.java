@@ -43,6 +43,14 @@ public class MROrcWritable implements Writable {
 		return orcStruct;
 	}
 
+	public void clear() {
+		if (writables != null) {
+			writables.clear();
+		}
+
+		writables = null;
+	}
+
 	@Override
 	public void write(DataOutput out) throws IOException {
 		throw new UnsupportedOperationException("write unsupported");
