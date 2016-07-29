@@ -19,7 +19,7 @@ import org.apache.hadoop.mapred.RecordReader;
  */
 public class ORCFileReaderMain {
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "deprecation", "unused" })
 	public static void main(String[] args) throws IOException {
 		String INPUT = "/user/hive/orc_test.orc";
 
