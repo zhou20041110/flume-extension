@@ -52,7 +52,7 @@ public class MROrcInputFormatDriver extends Configured implements Tool {
 				line += writables.get(index).toString();
 
 				if (index < (columns - 1)) {
-					line += "\n";
+					line += "\t";
 				}
 			}
 
