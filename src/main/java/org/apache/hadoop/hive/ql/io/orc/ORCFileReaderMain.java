@@ -21,7 +21,7 @@ public class ORCFileReaderMain {
 
 	@SuppressWarnings({ "rawtypes", "deprecation", "unused" })
 	public static void main(String[] args) throws IOException {
-		String INPUT = "/user/hive/orc_test.orc";
+		String INPUT = args[0];
 
 		Configuration conf = new Configuration();
 
