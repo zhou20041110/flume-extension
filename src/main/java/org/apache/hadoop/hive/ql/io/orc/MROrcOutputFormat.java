@@ -49,6 +49,8 @@ public class MROrcOutputFormat extends FileOutputFormat<NullWritable, MROrcWrita
 
 				orcSerdeRow.realRow = value.get();
 				orcSerdeRow.inspector = orcSerde.getObjectInspector();
+
+				writer.write(NullWritable.get(), orcSerdeRow);
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
