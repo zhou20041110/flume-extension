@@ -92,8 +92,9 @@ public class WWWMROrcOutputFormatDriver extends Configured implements Tool {
 	public int run(String[] args) throws Exception {
 		JobConf jobConf = new JobConf(getConf(), getClass());
 
-		jobConf.set(serdeConstants.LIST_COLUMNS, "first,second,third");
-		jobConf.set(serdeConstants.LIST_COLUMN_TYPES, "string,string,string");
+		jobConf.set(serdeConstants.LIST_COLUMNS, "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18");
+		jobConf.set(serdeConstants.LIST_COLUMN_TYPES,
+				"string:string:string:string:string:string:string:string:string:string:string:string:string:string:string:string:string:string");
 
 		jobConf.setJobName(WWWMROrcOutputFormatDriver.class.getName());
 
