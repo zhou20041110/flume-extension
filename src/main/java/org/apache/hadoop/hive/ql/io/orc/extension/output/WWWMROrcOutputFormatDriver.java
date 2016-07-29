@@ -75,7 +75,7 @@ public class WWWMROrcOutputFormatDriver extends Configured implements Tool {
 				MROrcWritable mrOrcWritable = new MROrcWritable();
 
 				for (int index = 0; index < GROUP; index++) {
-					mrOrcWritable.add(new Text(matcher.group(index)));
+					mrOrcWritable.add(new Text(matcher.group(index + 1)));
 				}
 
 				output.collect(NullWritable.get(), mrOrcWritable);
