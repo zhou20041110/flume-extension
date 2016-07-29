@@ -30,7 +30,13 @@ public class MROrcOutputFormat extends FileOutputFormat<NullWritable, MROrcWrita
 
 		public MROrcRecordWriter(FileSystem fileSystem, JobConf jobConf, String name, Progressable progress)
 				throws IOException {
-			writer = new OrcOutputFormat().getRecordWriter(fileSystem, jobConf, name, progress);
+			String outputPath = jobConf.get("mapred.output.dir");
+
+			if (outputPath.charAt(outputPath.length() - 1) != '/') {
+				outputPath += "/";
+			}
+
+			writer = new OrcOutputFormat().getRecordWriter(fileSystem, jobConf, outputPath + name, progress);
 
 			orcSerde = new OrcSerde();
 
