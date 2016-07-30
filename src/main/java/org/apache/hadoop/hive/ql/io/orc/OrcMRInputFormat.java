@@ -63,20 +63,20 @@ public class OrcMRInputFormat extends InputFormat<NullWritable, OrcMRWritable> {
 
 	@Override
 	public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
-		org.apache.hadoop.mapred.FileSplit[] fileSplits = (org.apache.hadoop.mapred.FileSplit[]) orcInputFormat
+		org.apache.hadoop.mapred.InputSplit[] inputSplits = orcInputFormat
 				.getSplits(new JobConf(context.getConfiguration()), 0);
 
-		List<InputSplit> inputSplits = new ArrayList<>();
+		List<InputSplit> splits = new ArrayList<>();
 
-		for (org.apache.hadoop.mapred.FileSplit fileSplit : fileSplits) {
+		for (org.apache.hadoop.mapred.InputSplit inputSplit : inputSplits) {
 			OrcMRInputSplit orcMRInputSplit = new OrcMRInputSplit();
 
-			orcMRInputSplit.setSplit(fileSplit);
+			orcMRInputSplit.setSplit((org.apache.hadoop.mapred.FileSplit) inputSplit);
 
-			inputSplits.add(orcMRInputSplit);
+			splits.add(orcMRInputSplit);
 		}
 
-		return inputSplits;
+		return splits;
 	}
 
 	@Override
