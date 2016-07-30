@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.io.orc.OrcMROutputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcMRWritable;
+import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -63,6 +64,9 @@ public class OrcMROutputFormatDriver extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {
 		Configuration conf = getConf();
+
+		conf.set(serdeConstants.LIST_COLUMNS, "first,second,third");
+		conf.set(serdeConstants.LIST_COLUMN_TYPES, "string:string:string");
 
 		Job job = new Job(conf);
 
