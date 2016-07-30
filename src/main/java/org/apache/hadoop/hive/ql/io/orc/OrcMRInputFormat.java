@@ -3,6 +3,8 @@
  */
 package org.apache.hadoop.hive.ql.io.orc;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,15 +27,15 @@ public class OrcMRInputFormat extends InputFormat<NullWritable, OrcMRWritable> {
 
 	private OrcInputFormat orcInputFormat = new OrcInputFormat();
 
-	public static class OrcMRInputSplit extends InputSplit {
+	public static class OrcMRInputSplit extends InputSplit implements Writable {
 
-		private org.apache.hadoop.mapred.InputSplit split;
+		private org.apache.hadoop.mapred.FileSplit split;
 
-		public org.apache.hadoop.mapred.InputSplit getSplit() {
+		public org.apache.hadoop.mapred.FileSplit getSplit() {
 			return split;
 		}
 
-		public void setSplit(org.apache.hadoop.mapred.InputSplit split) {
+		public void setSplit(org.apache.hadoop.mapred.FileSplit split) {
 			this.split = split;
 		}
 
@@ -47,19 +49,29 @@ public class OrcMRInputFormat extends InputFormat<NullWritable, OrcMRWritable> {
 			return split.getLocations();
 		}
 
+		@Override
+		public void write(DataOutput out) throws IOException {
+			split.write(out);
+		}
+
+		@Override
+		public void readFields(DataInput in) throws IOException {
+			split.readFields(in);
+		}
+
 	}
 
 	@Override
 	public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
-		org.apache.hadoop.mapred.InputSplit[] splits = orcInputFormat.getSplits(new JobConf(context.getConfiguration()),
-				0);
+		org.apache.hadoop.mapred.FileSplit[] fileSplits = (org.apache.hadoop.mapred.FileSplit[]) orcInputFormat
+				.getSplits(new JobConf(context.getConfiguration()), 0);
 
 		List<InputSplit> inputSplits = new ArrayList<>();
 
-		for (org.apache.hadoop.mapred.InputSplit inputSplit : splits) {
+		for (org.apache.hadoop.mapred.FileSplit fileSplit : fileSplits) {
 			OrcMRInputSplit orcMRInputSplit = new OrcMRInputSplit();
 
-			orcMRInputSplit.setSplit(inputSplit);
+			orcMRInputSplit.setSplit(fileSplit);
 
 			inputSplits.add(orcMRInputSplit);
 		}
