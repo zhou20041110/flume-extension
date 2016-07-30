@@ -6,10 +6,11 @@ package org.apache.hadoop.hive.ql.io.orc.extension.output;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.io.orc.MROrcOutputFormat;
-import org.apache.hadoop.hive.ql.io.orc.MROrcWritable;
+import org.apache.hadoop.hive.ql.io.orc.OrcMRWritable;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -25,7 +26,6 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
 
 /**
  * @author yurun
@@ -51,20 +51,20 @@ public class MROrcOutputFormatDriver extends Configured implements Tool {
 
 	}
 
-	public static class MROrcOutputFormatReducer implements Reducer<Text, NullWritable, NullWritable, MROrcWritable> {
+	public static class MROrcOutputFormatReducer implements Reducer<Text, NullWritable, NullWritable, OrcMRWritable> {
 
 		@Override
 		public void configure(JobConf job) {
 		}
 
 		@Override
-		public void reduce(Text key, Iterator<NullWritable> values, OutputCollector<NullWritable, MROrcWritable> output,
+		public void reduce(Text key, Iterator<NullWritable> values, OutputCollector<NullWritable, OrcMRWritable> output,
 				Reporter reporter) throws IOException {
 			String line = key.toString();
 
 			String[] words = line.split(" ");
 
-			MROrcWritable mrOrcWritable = new MROrcWritable();
+			OrcMRWritable mrOrcWritable = new OrcMRWritable();
 
 			for (String word : words) {
 				mrOrcWritable.add(new Text(word));
@@ -102,7 +102,7 @@ public class MROrcOutputFormatDriver extends Configured implements Tool {
 		jobConf.setReducerClass(MROrcOutputFormatReducer.class);
 
 		jobConf.setOutputKeyClass(NullWritable.class);
-		jobConf.setOutputValueClass(MROrcWritable.class);
+		jobConf.setOutputValueClass(OrcMRWritable.class);
 
 		RunningJob runningJob = JobClient.runJob(jobConf);
 
@@ -112,9 +112,34 @@ public class MROrcOutputFormatDriver extends Configured implements Tool {
 	}
 
 	public static void main(String[] args) throws Exception {
-		int exitCode = ToolRunner.run(new MROrcOutputFormatDriver(), args);
+		// int exitCode = ToolRunner.run(new MROrcOutputFormatDriver(), args);
+		//
+		// System.out.println("exitCode: " + exitCode);
 
-		System.out.println("exitCode: " + exitCode);
+		JobConf jobConf = new JobConf(new Configuration());
+
+		jobConf.set(serdeConstants.LIST_COLUMNS, "first,second,third");
+		jobConf.set(serdeConstants.LIST_COLUMN_TYPES, "string,string,string");
+
+		jobConf.setJobName(MROrcOutputFormatDriver.class.getName());
+
+		FileInputFormat.addInputPath(jobConf, new Path(args[0]));
+		FileOutputFormat.setOutputPath(jobConf, new Path(args[1]));
+
+		jobConf.setInputFormat(TextInputFormat.class);
+		jobConf.setOutputFormat(MROrcOutputFormat.class);
+
+		jobConf.setMapperClass(MROrcOutputFormatMapper.class);
+
+		jobConf.setMapOutputKeyClass(Text.class);
+		jobConf.setMapOutputValueClass(NullWritable.class);
+
+		jobConf.setReducerClass(MROrcOutputFormatReducer.class);
+
+		jobConf.setOutputKeyClass(NullWritable.class);
+		jobConf.setOutputValueClass(OrcMRWritable.class);
+
+		JobClient.runJob(jobConf);
 	}
 
 }

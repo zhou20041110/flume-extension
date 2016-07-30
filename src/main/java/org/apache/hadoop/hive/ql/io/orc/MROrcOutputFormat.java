@@ -20,9 +20,9 @@ import org.apache.hadoop.util.Progressable;
  * @author yurun
  *
  */
-public class MROrcOutputFormat extends FileOutputFormat<NullWritable, MROrcWritable> {
+public class MROrcOutputFormat extends FileOutputFormat<NullWritable, OrcMRWritable> {
 
-	public static class MROrcRecordWriter implements RecordWriter<NullWritable, MROrcWritable> {
+	public static class MROrcRecordWriter implements RecordWriter<NullWritable, OrcMRWritable> {
 
 		private RecordWriter<NullWritable, OrcSerdeRow> writer;
 
@@ -49,7 +49,7 @@ public class MROrcOutputFormat extends FileOutputFormat<NullWritable, MROrcWrita
 		}
 
 		@Override
-		public void write(NullWritable key, MROrcWritable value) throws IOException {
+		public void write(NullWritable key, OrcMRWritable value) throws IOException {
 			try {
 				OrcSerdeRow orcSerdeRow = orcSerde.new OrcSerdeRow();
 
@@ -72,7 +72,7 @@ public class MROrcOutputFormat extends FileOutputFormat<NullWritable, MROrcWrita
 	}
 
 	@Override
-	public RecordWriter<NullWritable, MROrcWritable> getRecordWriter(FileSystem fileSystem, JobConf jobConf,
+	public RecordWriter<NullWritable, OrcMRWritable> getRecordWriter(FileSystem fileSystem, JobConf jobConf,
 			String name, Progressable progress) throws IOException {
 		return new MROrcRecordWriter(fileSystem, jobConf, name, progress);
 	}

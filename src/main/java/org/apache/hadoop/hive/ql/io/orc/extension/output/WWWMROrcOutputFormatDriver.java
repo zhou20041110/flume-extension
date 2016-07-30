@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.io.orc.MROrcOutputFormat;
-import org.apache.hadoop.hive.ql.io.orc.MROrcWritable;
+import org.apache.hadoop.hive.ql.io.orc.OrcMRWritable;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -54,7 +54,7 @@ public class WWWMROrcOutputFormatDriver extends Configured implements Tool {
 
 	}
 
-	public static class MROrcOutputFormatReducer implements Reducer<Text, NullWritable, NullWritable, MROrcWritable> {
+	public static class MROrcOutputFormatReducer implements Reducer<Text, NullWritable, NullWritable, OrcMRWritable> {
 
 		private static final Pattern PATTERN = Pattern.compile(
 				"^_accesskey=([^=]*)&_ip=([^=]*)&_port=([^=]*)&_an=([^=]*)&_data=([^\\s]*) ([^\\s]*) ([^\\s]*) ([^\\s]*) \\[([^\\s]*) ([^\\s]*) ([^\\s]*) ([^\\s]*) ([^\\s]*) ([^\\s]*) ([^\\s]*) ([^\\s]*) ([^\\s]*) (.*)$");
@@ -66,14 +66,14 @@ public class WWWMROrcOutputFormatDriver extends Configured implements Tool {
 		}
 
 		@Override
-		public void reduce(Text key, Iterator<NullWritable> values, OutputCollector<NullWritable, MROrcWritable> output,
+		public void reduce(Text key, Iterator<NullWritable> values, OutputCollector<NullWritable, OrcMRWritable> output,
 				Reporter reporter) throws IOException {
 			String line = key.toString();
 
 			Matcher matcher = PATTERN.matcher(line);
 
 			if (matcher.matches() && matcher.groupCount() == GROUP) {
-				MROrcWritable mrOrcWritable = new MROrcWritable();
+				OrcMRWritable mrOrcWritable = new OrcMRWritable();
 
 				for (int index = 0; index < GROUP; index++) {
 					mrOrcWritable.add(new Text(matcher.group(index + 1)));
@@ -113,7 +113,7 @@ public class WWWMROrcOutputFormatDriver extends Configured implements Tool {
 		jobConf.setReducerClass(MROrcOutputFormatReducer.class);
 
 		jobConf.setOutputKeyClass(NullWritable.class);
-		jobConf.setOutputValueClass(MROrcWritable.class);
+		jobConf.setOutputValueClass(OrcMRWritable.class);
 		
 		RunningJob runningJob = JobClient.runJob(jobConf);
 

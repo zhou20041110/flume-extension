@@ -18,9 +18,9 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  * @author yurun
  *
  */
-public class OrcMROutputFormat extends FileOutputFormat<NullWritable, MROrcWritable> {
+public class OrcMROutputFormat extends FileOutputFormat<NullWritable, OrcMRWritable> {
 
-	public static class OrcMRRecordWriter extends RecordWriter<NullWritable, MROrcWritable> {
+	public static class OrcMRRecordWriter extends RecordWriter<NullWritable, OrcMRWritable> {
 
 		private org.apache.hadoop.mapred.RecordWriter<NullWritable, OrcSerdeRow> writer;
 
@@ -42,7 +42,7 @@ public class OrcMROutputFormat extends FileOutputFormat<NullWritable, MROrcWrita
 		}
 
 		@Override
-		public void write(NullWritable key, MROrcWritable value) throws IOException, InterruptedException {
+		public void write(NullWritable key, OrcMRWritable value) throws IOException, InterruptedException {
 			try {
 				OrcSerdeRow orcSerdeRow = orcSerde.new OrcSerdeRow();
 
@@ -63,7 +63,7 @@ public class OrcMROutputFormat extends FileOutputFormat<NullWritable, MROrcWrita
 	}
 
 	@Override
-	public RecordWriter<NullWritable, MROrcWritable> getRecordWriter(TaskAttemptContext context)
+	public RecordWriter<NullWritable, OrcMRWritable> getRecordWriter(TaskAttemptContext context)
 			throws IOException, InterruptedException {
 		return new OrcMRRecordWriter(context, getDefaultWorkFile(context, ".orc").toString());
 	}

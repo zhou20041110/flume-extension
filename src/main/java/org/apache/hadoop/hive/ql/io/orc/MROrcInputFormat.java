@@ -17,7 +17,7 @@ import org.apache.hadoop.mapred.Reporter;
  * @author yurun
  *
  */
-public class MROrcInputFormat implements InputFormat<NullWritable, MROrcWritable> {
+public class MROrcInputFormat implements InputFormat<NullWritable, OrcMRWritable> {
 
 	private OrcInputFormat orcInputFormat = new OrcInputFormat();
 
@@ -27,9 +27,9 @@ public class MROrcInputFormat implements InputFormat<NullWritable, MROrcWritable
 	}
 
 	@Override
-	public RecordReader<NullWritable, MROrcWritable> getRecordReader(InputSplit split, JobConf job, Reporter reporter)
+	public RecordReader<NullWritable, OrcMRWritable> getRecordReader(InputSplit split, JobConf job, Reporter reporter)
 			throws IOException {
-		return new RecordReader<NullWritable, MROrcWritable>() {
+		return new RecordReader<NullWritable, OrcMRWritable>() {
 
 			private RecordReader<NullWritable, OrcStruct> reader = orcInputFormat.getRecordReader(split, job, reporter);
 
@@ -38,7 +38,7 @@ public class MROrcInputFormat implements InputFormat<NullWritable, MROrcWritable
 			private OrcStruct orcStruct = new OrcStruct(0);
 
 			@Override
-			public boolean next(NullWritable key, MROrcWritable value) throws IOException {
+			public boolean next(NullWritable key, OrcMRWritable value) throws IOException {
 				boolean next = reader.next(nullWritable, orcStruct);
 
 				int columns = orcStruct.getNumFields();
@@ -58,8 +58,8 @@ public class MROrcInputFormat implements InputFormat<NullWritable, MROrcWritable
 			}
 
 			@Override
-			public MROrcWritable createValue() {
-				return new MROrcWritable();
+			public OrcMRWritable createValue() {
+				return new OrcMRWritable();
 			}
 
 			@Override

@@ -15,7 +15,7 @@ import org.apache.hadoop.io.Writable;
  * @author yurun
  *
  */
-public class MROrcWritable implements Writable {
+public class OrcMRWritable implements Writable {
 
 	private List<Writable> writables;
 

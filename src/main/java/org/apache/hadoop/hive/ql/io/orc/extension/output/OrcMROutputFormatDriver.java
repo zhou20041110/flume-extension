@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.hive.ql.io.orc.MROrcWritable;
+import org.apache.hadoop.hive.ql.io.orc.OrcMRWritable;
 import org.apache.hadoop.hive.ql.io.orc.OrcMROutputFormat;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -36,17 +36,17 @@ public class OrcMROutputFormatDriver extends Configured implements Tool {
 
 	}
 
-	public static class OrcMROutputFormatReducer extends Reducer<Text, NullWritable, NullWritable, MROrcWritable> {
+	public static class OrcMROutputFormatReducer extends Reducer<Text, NullWritable, NullWritable, OrcMRWritable> {
 
 		@Override
 		protected void reduce(Text key, Iterable<NullWritable> values,
-				Reducer<Text, NullWritable, NullWritable, MROrcWritable>.Context context)
+				Reducer<Text, NullWritable, NullWritable, OrcMRWritable>.Context context)
 				throws IOException, InterruptedException {
 			String line = key.toString();
 
 			String[] words = line.split(" ");
 
-			MROrcWritable mrOrcWritable = new MROrcWritable();
+			OrcMRWritable mrOrcWritable = new OrcMRWritable();
 
 			for (String word : words) {
 				mrOrcWritable.add(new Text(word));
@@ -76,7 +76,7 @@ public class OrcMROutputFormatDriver extends Configured implements Tool {
 		job.setReducerClass(OrcMROutputFormatReducer.class);
 
 		job.setOutputKeyClass(NullWritable.class);
-		job.setOutputValueClass(MROrcWritable.class);
+		job.setOutputValueClass(OrcMRWritable.class);
 
 		return job.waitForCompletion(true) ? 0 : -1;
 	}

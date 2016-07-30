@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.io.orc.MROrcInputFormat;
-import org.apache.hadoop.hive.ql.io.orc.MROrcWritable;
+import org.apache.hadoop.hive.ql.io.orc.OrcMRWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -33,14 +33,14 @@ import org.apache.hadoop.util.ToolRunner;
  */
 public class MROrcInputFormatDriver extends Configured implements Tool {
 
-	public static class MROrcInputFormatMapper implements Mapper<NullWritable, MROrcWritable, Text, NullWritable> {
+	public static class MROrcInputFormatMapper implements Mapper<NullWritable, OrcMRWritable, Text, NullWritable> {
 
 		@Override
 		public void configure(JobConf job) {
 		}
 
 		@Override
-		public void map(NullWritable key, MROrcWritable value, OutputCollector<Text, NullWritable> output,
+		public void map(NullWritable key, OrcMRWritable value, OutputCollector<Text, NullWritable> output,
 				Reporter reporter) throws IOException {
 			List<Writable> writables = value.gets();
 
