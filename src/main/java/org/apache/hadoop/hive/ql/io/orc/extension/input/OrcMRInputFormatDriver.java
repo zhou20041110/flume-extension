@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.io.orc.OrcMRInputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcMRWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -16,6 +17,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -70,6 +73,9 @@ public class OrcMRInputFormatDriver extends Configured implements Tool {
 		Job job = new Job(conf);
 
 		job.setJarByClass(OrcMRInputFormatDriver.class);
+
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
 		job.setInputFormatClass(OrcMRInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
