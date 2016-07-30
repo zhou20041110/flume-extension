@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -51,11 +52,17 @@ public class OrcMRInputFormat extends InputFormat<NullWritable, OrcMRWritable> {
 
 		@Override
 		public void write(DataOutput out) throws IOException {
-			split.write(out);
+			if (split != null) {
+				split.write(out);
+			}
 		}
 
 		@Override
 		public void readFields(DataInput in) throws IOException {
+			if (split == null) {
+				split = new FileSplit(null, 0, 0, new String[] {});
+			}
+
 			split.readFields(in);
 		}
 
