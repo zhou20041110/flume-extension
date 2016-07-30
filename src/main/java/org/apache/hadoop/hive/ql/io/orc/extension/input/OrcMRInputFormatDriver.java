@@ -94,6 +94,7 @@ public class OrcMRInputFormatDriver extends Configured implements Tool {
 	}
 
 	public static void main(String[] args) throws Exception {
+		System.out.println("haha  haha");
 		ToolRunner.run(new OrcMRInputFormatDriver(), args);
 	}
 
